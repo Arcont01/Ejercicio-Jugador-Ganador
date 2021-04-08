@@ -13,6 +13,5 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
-});
+$router->get('/',['as' => 'home.index', 'uses' => 'HomeController@index']);
+$router->post('/',['as' => 'home.store', 'uses' => 'HomeController@store']);
