@@ -9,6 +9,16 @@
                 <div class="form-group">
                     <label for="file">Subir archivo</label>
                     <input type="file" name="file" id="file" class="form-control rounded-pill">
+                    @isset($errors)
+                    <div class="text-danger">
+                        <p>{{$errors->first('file')}}</p>
+                    </div>
+                    @endisset
+                    @isset($error_requirements)
+                    <div class="text-danger">
+                        <p>{{$error_requirements}}</p>
+                    </div>
+                    @endisset
                 </div>
                 <button type="submit" class="btn btn-primary rounded-pill">Enviar</button>
             </form>

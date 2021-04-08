@@ -28,7 +28,11 @@ class HomeController extends Controller
 
         $answer = $this->checkRounds($content);
 
+
+
+
         if(array_key_exists('error', $answer)){
+
             $answer['error_requirements'] = $answer['error'];
             return view('home', $answer);
         }
@@ -39,6 +43,7 @@ class HomeController extends Controller
         $answer = $this->calculateWinnerPlayer($rounds, $content);
 
         if(array_key_exists('error', $answer)){
+
             $answer['error_requirements'] = $answer['error'];
             return view('home', $answer);
         }
