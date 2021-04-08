@@ -13,7 +13,7 @@ class UploadTest extends TestCase
      */
     public function testApplication()
     {
-        $file = UploadedFile::fake()->create('avatar.pdf');
+        $file = UploadedFile::fake()->create('prueba.pdf');
 
         $response = $this->post('/', [
             'file' => $file,
