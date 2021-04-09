@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CustomException;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -19,8 +20,8 @@ class HomeController extends Controller
         ]);
 
         if ($validate->fails()) {
-            $data['errors'] = $validate->errors();
-            return view('home', $data);
+            $errors = $validate->errors();
+            throw new CustomException('Deben de ser unicamente dos jugadores');
         }
 
         $file = $request->file('file');
@@ -28,25 +29,10 @@ class HomeController extends Controller
 
         $answer = $this->checkRounds($content);
 
-
-
-
-        if(array_key_exists('error', $answer)){
-
-            $answer['error_requirements'] = $answer['error'];
-            return view('home', $answer);
-        }
-
         $rounds = $answer['rounds'];
         $content = $answer['content'];
 
         $answer = $this->calculateWinnerPlayer($rounds, $content);
-
-        if(array_key_exists('error', $answer)){
-
-            $answer['error_requirements'] = $answer['error'];
-            return view('home', $answer);
-        }
 
         return view('success', $answer);
 
@@ -60,7 +46,7 @@ class HomeController extends Controller
         $rounds = (int)array_shift($content);
 
         if ($rounds > 10000) {
-           return ['error' => 'El numero de rondas no puede ser mayor que 10000'];
+            throw new CustomException('El numero de rondas no puede ser mayor que 10000');
         }
 
         return ['rounds' => $rounds, 'content' => $content];
@@ -76,26 +62,27 @@ class HomeController extends Controller
         $differencePoints = [];
 
         if($rounds > count($playersRounds)){
-            return ['error' => 'El numero de rounds definido es mayor al dado'];
+            throw new CustomException('El numero de rounds definido es mayor al dado');
         }
 
         for ($i = 0; $i < $rounds; $i++) {
             $temp = explode(' ', $playersRounds[$i]);
 
             if(count($temp) != 2){
-                return ['error' => 'Deben de ser unicamente dos jugadores'];
+                throw new CustomException('Deben de ser unicamente dos jugadores');
             }
 
             $firstPlayer = (int) $temp[0];
             $secondPlayer = (int) $temp[1];
             if ($firstPlayer > $secondPlayer) {
                 $winnerPlayers[] = 1;
+                $tempDifference = $firstPlayer - $secondPlayer;
             } else {
                 $winnerPlayers[] = 2;
+                $tempDifference = $secondPlayer - $firstPlayer ;
             }
 
-            $tempDifference = $firstPlayer - $secondPlayer;
-            $differencePoints[] = $tempDifference =  abs($tempDifference);
+            $differencePoints[] = $tempDifference;
         }
 
         $max_point = max($differencePoints);
