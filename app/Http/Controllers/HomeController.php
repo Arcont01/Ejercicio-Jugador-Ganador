@@ -37,7 +37,8 @@ class HomeController extends Controller
 
             return view('success', $answer);
         }catch(\Throwable $th){
-            throw new CustomException($th->getMessage());
+            \Log::error($th);
+            throw new CustomException('Un error inesperado a pasado');
         }
 
     }
