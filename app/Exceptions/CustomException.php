@@ -21,6 +21,7 @@ class CustomException extends Exception
      */
     public function render($request)
     {
-        return response()->view('home', ['exception' => $this]);
+        \Log::error($this);
+        return response()->make(view('home', ['error_requirements' => $this->getMessage()]), 400);
     }
 }

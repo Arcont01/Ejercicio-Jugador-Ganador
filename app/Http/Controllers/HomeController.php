@@ -21,20 +21,24 @@ class HomeController extends Controller
 
         if ($validate->fails()) {
             $errors = $validate->errors();
-            throw new CustomException('Deben de ser unicamente dos jugadores');
+            throw new CustomException($errors->first());
         }
 
-        $file = $request->file('file');
-        $content =  file($file);
+        try{
+            $file = $request->file('file');
+            $content =  file($file);
 
-        $answer = $this->checkRounds($content);
+            $answer = $this->checkRounds($content);
 
-        $rounds = $answer['rounds'];
-        $content = $answer['content'];
+            $rounds = $answer['rounds'];
+            $content = $answer['content'];
 
-        $answer = $this->calculateWinnerPlayer($rounds, $content);
+            $answer = $this->calculateWinnerPlayer($rounds, $content);
 
-        return view('success', $answer);
+            return view('success', $answer);
+        }catch(\Throwable $th){
+            throw new CustomException($th->getMessage());
+        }
 
     }
 
@@ -43,10 +47,19 @@ class HomeController extends Controller
         foreach ($content as $key => $line) {
             $content[$key] = trim($line);
         }
-        $rounds = (int)array_shift($content);
+
+        $rounds = array_shift($content);
+
+        if(!preg_match('/^[0-9]+$/', $rounds)){
+            throw new CustomException('La cantidad de rondas unicamente pueden ser enteros');
+        }
+
+        $rounds = (int)$rounds;
 
         if ($rounds > 10000) {
             throw new CustomException('El numero de rondas no puede ser mayor que 10000');
+        }elseif ($rounds == 0) {
+            throw new CustomException('No se puede jugar con 0 rondas definidas');
         }
 
         return ['rounds' => $rounds, 'content' => $content];
@@ -69,11 +82,16 @@ class HomeController extends Controller
             $temp = explode(' ', $playersRounds[$i]);
 
             if(count($temp) != 2){
-                throw new CustomException('Deben de ser unicamente dos jugadores');
+                throw new CustomException('No pueden ser mas de dos jugadores');
+            }
+
+            if(!preg_match('/^[0-9]+$/', $temp[0]) || !preg_match('/^[0-9]+$/', $temp[1])){
+                throw new CustomException('Las rondas unicamente pueden tener numeros enteros');
             }
 
             $firstPlayer = (int) $temp[0];
             $secondPlayer = (int) $temp[1];
+
             if ($firstPlayer > $secondPlayer) {
                 $winnerPlayers[] = 1;
                 $tempDifference = $firstPlayer - $secondPlayer;
